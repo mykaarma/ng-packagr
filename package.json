@@ -1,6 +1,6 @@
 {
   "name": "ng-packagr",
-  "version": "17.1.2",
+  "version": "17.2.0-rc.6",
   "description": "Compile and package Angular libraries in Angular Package Format (APF)",
   "keywords": [
     "apf",
@@ -52,6 +52,7 @@
     "ora": "^5.1.0",
     "piscina": "^4.2.0",
     "postcss": "^8.4.31",
+    "postcss-load-config": "^5.0.2",
     "rxjs": "^7.8.1",
     "sass": "^1.69.5"
   },

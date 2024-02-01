@@ -33,15 +33,15 @@ const CACHE_KEY_VALUES = [...browserslistData, ...styleIncludePaths, cssUrl].joi
  *
  * Based on https://tailwindcss.com/docs/functions-and-directives
  */
-const TAILWIND_KEYWORDS = [
-  '@tailwind',
-  '@layer',
-  '@apply',
-  '@config',
-  'theme(',
-  'screen(',
-  '@screen', // Undocumented in version 3, see: https://github.com/tailwindlabs/tailwindcss/discussions/7516.
-];
+// const TAILWIND_KEYWORDS = [
+//   '@tailwind',
+//   '@layer',
+//   '@apply',
+//   '@config',
+//   'theme(',
+//   'screen(',
+//   '@screen', // Undocumented in version 3, see: https://github.com/tailwindlabs/tailwindcss/discussions/7516.
+// ];
 
 async function render({ content, filePath }: RenderRequest): Promise<string> {
   let key: string | undefined;
@@ -75,7 +75,7 @@ async function render({ content, filePath }: RenderRequest): Promise<string> {
   }
 
   const warnings: string[] = [];
-  if (hasTailwindKeywords(renderedCss)) {
+  if (postCssProcessor) {
     const result = await postCssProcessor.process(renderedCss, {
       from: filePath,
       to: filePath.replace(extname(filePath), '.css'),
@@ -189,12 +189,22 @@ function getTailwindPlugin() {
   }
 }
 
-let usesTailwind = false;
+// let usesTailwind = false;
 async function initialize() {
-  const postCssPlugins = [];
+  const postcssrc = require('postcss-load-config');
+  let postCssPlugins = [];
+  try {
+    postCssPlugins = (await postcssrc()).plugins ?? [];
+    if (postCssPlugins.length) {
+      cacheDirectory = undefined;
+    }
+    console.log('in initialize plugins', postCssPlugins);
+  } catch (e) {
+    console.warn('in initialise postcss config not found');
+  }
   const tailwinds = getTailwindPlugin();
   if (tailwinds) {
-    usesTailwind = true;
+    // usesTailwind = true;
     postCssPlugins.push(tailwinds);
     cacheDirectory = undefined;
   }
@@ -211,14 +221,14 @@ async function initialize() {
  * Searches the provided contents for keywords that indicate Tailwind is used
  * within a stylesheet.
  */
-function hasTailwindKeywords(contents: string): boolean {
-  if (!usesTailwind) {
-    return false;
-  }
+// function hasTailwindKeywords(contents: string): boolean {
+//   if (!usesTailwind) {
+//     return false;
+//   }
 
-  // TODO: use better search algorithm for keywords
-  return TAILWIND_KEYWORDS.some(keyword => contents.includes(keyword));
-}
+//   // TODO: use better search algorithm for keywords
+//   return TAILWIND_KEYWORDS.some(keyword => contents.includes(keyword));
+// }
 
 /**
  * The default export will be the promise returned by the initialize function.
